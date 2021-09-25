@@ -21,7 +21,7 @@ object GaussianMutationType extends Enumeration {
  */
 object MutationManager {
 
-  //TODO sistemare questione depth
+  //TODO check depth in mutations
 
   /**
    * Static method to perform mutations.
@@ -34,7 +34,7 @@ object MutationManager {
   def performMutation(tree: ImprovedExpressionTree): ImprovedExpressionTree = {
     val randomDepth = Random.nextInt(tree.depth())
 
-    val treeLevel = tree.getNodesAtDepth(randomDepth)
+    val treeLevel = tree.getNodesAtDepth(randomDepth + 1)
 
     val randomSubtree: ImprovedExpressionTree = treeLevel(Random.nextInt(treeLevel.size))
 
