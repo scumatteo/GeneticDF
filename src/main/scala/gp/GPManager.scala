@@ -32,17 +32,18 @@ object GPManager {
   val GAUSSIAN_PROBABILITY: Double = 0.5
 
   /**
-   * The probability of perform crossover.
+   * The probability of crossover.
    */
   val CROSSOVER_RATE = 0.5
 
   /**
-   * The probability of perform a mutation.
+   * The probability of carrying out a mutation.
    */
   val MUTATION_RATE = 0.5
 
   /**
-   * Value used as a weight in the fitness calculation.
+   * Value used as weight in the fitness calculation.
+   * The greater it is, the more the error has weight with respect to the complexity of the tree.
    */
   val ALPHA_WEIGHT = 0.7
 
@@ -55,6 +56,7 @@ object GPManager {
    * @return a tuple that contains the best IE-Tree and its error.
    */
   def geneticDataFitting(inputs: List[Double], outputs: List[Double]): (ImprovedExpressionTree, Double) = {
+
     //Step 1: Initialization
     val generation = 0
     val initialPopulation = TreeManager.createInitialPopulation(POPULATION_SIZE)
@@ -71,10 +73,10 @@ object GPManager {
     @tailrec
     def loop(g: Int, population: List[ImprovedExpressionTree], bestError: Double): (ImprovedExpressionTree, Double) = g match {
       case g if g == MAX_GENERATIONS =>
-        println("Finish!")
+        println("Finish!\n")
         (population.head, bestError)
       case _ =>
-        println("Generation: " + g)
+        println("Generation: " + (g + 1))
 
         //Step 2: Crossover and mutations
         val crossoverParents = population.filter(_ => Random.nextDouble() < CROSSOVER_RATE).grouped(2)

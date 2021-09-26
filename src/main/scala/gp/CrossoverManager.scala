@@ -65,11 +65,11 @@ object CrossoverManager {
   private def cross(tree: ImprovedExpressionTree,
             mySubtree: ImprovedExpressionTree, otherSubtree: ImprovedExpressionTree, strategy: CrossoverType): ImprovedExpressionTree = tree match {
     case n: Node if n.l == mySubtree =>
-      n.replaceChildren(if(strategy == CrossoverType.STRATEGY_1) otherSubtree else otherSubtree.copyWithMP(mySubtree.multiplierFactor), n.r.clone())
+      n.copyWithChildren(if(strategy == CrossoverType.STRATEGY_1) otherSubtree else otherSubtree.copyWithMP(mySubtree.multiplierFactor), n.r.clone())
     case n: Node if n.r == mySubtree =>
-      n.replaceChildren(n.l.clone(), if(strategy == CrossoverType.STRATEGY_1) otherSubtree else otherSubtree.copyWithMP(mySubtree.multiplierFactor))
+      n.copyWithChildren(n.l.clone(), if(strategy == CrossoverType.STRATEGY_1) otherSubtree else otherSubtree.copyWithMP(mySubtree.multiplierFactor))
     case n: Node =>
-      n.replaceChildren(cross(n.l, mySubtree, otherSubtree, strategy), cross(n.r, mySubtree, otherSubtree, strategy))
+      n.copyWithChildren(cross(n.l, mySubtree, otherSubtree, strategy), cross(n.r, mySubtree, otherSubtree, strategy))
     case _ => tree
 
   }

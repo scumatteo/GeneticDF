@@ -40,7 +40,7 @@ object ImprovedExpressionTree {
     case FunctionSet.MUL => MulNode(left, right, multiplierFactor)
     case FunctionSet.SUB => SubNode(left, right, multiplierFactor)
   }
-
+/*
   /**
    * Constructor for ConstNode.
    * @param terminal the type of node.
@@ -77,6 +77,8 @@ object ImprovedExpressionTree {
   def apply(terminal: TerminalSet, mean: Double, variance: Double, multiplierFactor: Double): Leaf = terminal match {
     case TerminalSet.GAUSSIAN => GaussianNode(mean, variance, multiplierFactor)
   }
+
+ */
 
   /**
    * Trait that represents an IE-Tree. It is extends as its structure part (sp) and it has a multiplier factor (mp).
@@ -170,7 +172,7 @@ object ImprovedExpressionTree {
      *
      * @return the new node.
      */
-    def replaceChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node
+    def copyWithChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node
   }
 
   /**
@@ -190,13 +192,13 @@ object ImprovedExpressionTree {
                      override val r: ImprovedExpressionTree,
                      override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Node {
 
-    override def label(): String = " + "
+    override def label(): String =  "mp: " + multiplierFactor.toString.take(4) + ", sp: +"
 
     override def eval(input: Double): Double = this.multiplierFactor * (l.eval(input) + r.eval(input))
 
     override def clone(): AddNode = AddNode(this.l.clone(), this.r.clone(), multiplierFactor)
 
-    override def replaceChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = AddNode(left, right, multiplierFactor)
+    override def copyWithChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = AddNode(left, right, multiplierFactor)
 
     override def copyWithMP(multiplierFactor: Double): ImprovedExpressionTree = AddNode(this.l, this.r, multiplierFactor)
   }
@@ -212,13 +214,13 @@ object ImprovedExpressionTree {
                      override val r: ImprovedExpressionTree,
                      override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Node {
 
-    override def label(): String = " - "
+    override def label(): String = "mp: " + multiplierFactor.toString.take(4) + ", sp: -"
 
     override def eval(input: Double): Double = this.multiplierFactor * (l.eval(input) - r.eval(input))
 
     override def clone(): SubNode = SubNode(this.l.clone(), this.r.clone(), multiplierFactor)
 
-    override def replaceChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = SubNode(left, right, multiplierFactor)
+    override def copyWithChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = SubNode(left, right, multiplierFactor)
 
     override def copyWithMP(multiplierFactor: Double): ImprovedExpressionTree = SubNode(this.l, this.r, multiplierFactor)
 
@@ -236,13 +238,13 @@ object ImprovedExpressionTree {
                      override val r: ImprovedExpressionTree,
                      override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Node {
 
-    override def label(): String = " * "
+    override def label(): String = "mp: " + multiplierFactor.toString.take(4) + ", sp: *"
 
     override def eval(input: Double): Double = this.multiplierFactor * (l.eval(input) * r.eval(input))
 
     override def clone(): MulNode = MulNode(this.l.clone(), this.r.clone(), multiplierFactor)
 
-    override def replaceChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = MulNode(left, right, multiplierFactor)
+    override def copyWithChildren(left: ImprovedExpressionTree, right: ImprovedExpressionTree): Node = MulNode(left, right, multiplierFactor)
 
     override def copyWithMP(multiplierFactor: Double): ImprovedExpressionTree = MulNode(this.l, this.r, multiplierFactor)
 
@@ -256,7 +258,7 @@ object ImprovedExpressionTree {
    */
   case class ConstNode(value: Double, override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Leaf {
 
-    override def label(): String = this.value.toString //.take(3)
+    override def label(): String = "mp: " + multiplierFactor.toString.take(4) + ", sp: " + this.value.toString.take(4)
 
     override def eval(input: Double): Double = this.multiplierFactor * this.value
 
@@ -273,7 +275,7 @@ object ImprovedExpressionTree {
    */
   case class InputNode(override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Leaf {
 
-    override def label(): String = "X"  //.take(3)
+    override def label(): String = "mp: " + multiplierFactor.toString.take(4) + ", sp: X"
 
     override def eval(input: Double): Double = this.multiplierFactor * input
 
@@ -292,7 +294,7 @@ object ImprovedExpressionTree {
    */
   case class GaussianNode(mean: Double, variance: Double, override val multiplierFactor: Double = DoubleUtils.getRandomDouble()) extends Leaf {
 
-    override def label(): String = "N(X | " + mean.toString /*.take(3) */ + ", " + variance.toString /*.take(3) */ + ")"
+    override def label(): String = "mp: " + multiplierFactor.toString.take(4) + ", sp: N(X | " + mean.toString.take(4)  + ", " + variance.toString.take(4) + ")"
 
     override def eval(input: Double): Double = this.multiplierFactor * GaussianUtils.getGaussianValue(input, mean, variance)
 

@@ -73,9 +73,9 @@ object MutationManager {
    * @return the new IE-Tree.
    */
   private def mutate(oldTree: ImprovedExpressionTree, oldNode: ImprovedExpressionTree, newNode: ImprovedExpressionTree): ImprovedExpressionTree = oldTree match {
-    case n: Node if n.l == oldNode => n.replaceChildren(newNode, n.r.clone())
-    case n: Node if n.r == oldNode => n.replaceChildren(n.l.clone(), newNode)
-    case n: Node => n.replaceChildren(mutate(n.l, oldNode, newNode), mutate(n.r, oldNode, newNode))
+    case n: Node if n.l == oldNode => n.copyWithChildren(newNode, n.r.clone())
+    case n: Node if n.r == oldNode => n.copyWithChildren(n.l.clone(), newNode)
+    case n: Node => n.copyWithChildren(mutate(n.l, oldNode, newNode), mutate(n.r, oldNode, newNode))
     case _ => oldTree
   }
 
