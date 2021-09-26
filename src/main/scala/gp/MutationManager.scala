@@ -21,8 +21,6 @@ object GaussianMutationType extends Enumeration {
  */
 object MutationManager {
 
-  //TODO check depth in mutations
-
   /**
    * Static method to perform mutations.
    * A random depth is chosen, then a random node at this depth is chosen for the mutation.
@@ -32,9 +30,9 @@ object MutationManager {
    * @return the new IE-Tree with the mutation.
    */
   def performMutation(tree: ImprovedExpressionTree): ImprovedExpressionTree = {
-    val randomDepth = Random.nextInt(tree.depth())
+    val randomDepth = Random.nextInt(tree.depth() + 1)
 
-    val treeLevel = tree.getNodesAtDepth(randomDepth + 1)
+    val treeLevel = tree.getNodesAtDepth(randomDepth)
 
     val randomSubtree: ImprovedExpressionTree = treeLevel(Random.nextInt(treeLevel.size))
 

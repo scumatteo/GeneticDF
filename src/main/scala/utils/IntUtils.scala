@@ -14,6 +14,6 @@ object IntUtils {
    * @param max the superior limit of the range.
    * @return the random integer inside the range.
    */
-  def getRandomInt(min: Int, max: Int): Int = Random.nextInt(Math.max(2, max - min)) + min
+  def getRandomInt(min: Int, max: Int): Int = Random.nextInt(max - min) + min
 
 }

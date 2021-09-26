@@ -26,8 +26,6 @@ object CrossoverManager {
    */
   val STRATEGY_1_PROBABILITY: Double = 0.6
 
-  //TODO check depth in crossover
-
   /**
    * Static method to perform crossover between two trees.
    *
@@ -41,8 +39,8 @@ object CrossoverManager {
   def performCrossover(tree1: ImprovedExpressionTree, tree2: ImprovedExpressionTree): (ImprovedExpressionTree, ImprovedExpressionTree) = {
     val strategy = CrossoverType(if (Random.nextDouble() < STRATEGY_1_PROBABILITY) 0 else 1)
 
-    val randomDepth1 = IntUtils.getRandomInt(1, tree1.depth())
-    val randomDepth2 = IntUtils.getRandomInt(1, tree2.depth())
+    val randomDepth1 = IntUtils.getRandomInt(1, tree1.depth() + 1)
+    val randomDepth2 = IntUtils.getRandomInt(1, tree2.depth() + 1)
 
     val tree1Level = tree1.getNodesAtDepth(randomDepth1)
     val tree2Level = tree2.getNodesAtDepth(randomDepth2)
