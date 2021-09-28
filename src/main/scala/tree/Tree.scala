@@ -1,7 +1,6 @@
 package tree
 
 import tree.FunctionSet.FunctionSet
-import tree.TerminalSet.TerminalSet
 import utils.{DoubleUtils, GaussianUtils}
 
 /**

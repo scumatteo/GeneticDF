@@ -65,52 +65,51 @@ object GPManager {
      *
      * @param g          the current generation.
      * @param population the current population.
-     * @param bestError  the best error of the previous generation.
+     * @param bestTreeError  the best error of the previous generation.
      * @return a tuple that contains the best IE-Tree and the best error.
      */
     @tailrec
-    def loop(g: Int, population: List[ImprovedExpressionTree], bestError: Double): (ImprovedExpressionTree, Double) = g match {
+    def loop(g: Int, population: List[ImprovedExpressionTree], bestTreeError: Double): (ImprovedExpressionTree, Double) = g match {
       case g if g == MAX_GENERATIONS =>
         println("Finish!\n")
-        (population.head, bestError)
+        (population.head, bestTreeError)
       case _ =>
         println("Generation: " + (g + 1))
 
         //Step 2: Crossover and mutations
         val crossoverParents = population.filter(_ => Random.nextDouble() < CROSSOVER_RATE).grouped(2)
-          .filter(l => l.size == 2).filter(l => l(0).depth() > 0 && l(1).depth() > 0).map(l => (l(0), l(1))).toList
+          .filter(_.size == 2).filter(l => l(0).depth() > 0 && l(1).depth() > 0).map(l => (l(0), l(1))).toList
         val crossoverOffsprings = crossoverParents.map(t => CrossoverManager.performCrossover(t._1, t._2))
 
         val mutationsParents = population.filter(_ => Random.nextDouble() < MUTATION_RATE)
-        val mutationsOffsprings = mutationsParents.map(t => MutationManager.performMutation(t))
+        val mutationsOffsprings = mutationsParents.map(MutationManager.performMutation)
 
 
         //Step 3: Model evaluation and selection
         val totalPopulation = crossoverOffsprings.flatMap(c => List(c._1, c._2)) ::: mutationsOffsprings ::: population
-        val totalErrors = totalPopulation.map(p => computeTotalError(p, inputs, outputs, (i, o) => Math.abs(i - o), l => l.sum / l.size))
+        val totalErrors = totalPopulation.map(computeTotalError(_, inputs, outputs, (i, o) => Math.abs(i - o), l => l.sum / l.size))
 
         //if error = 0 is found, returns.
-        if (totalErrors.indices.exists(i => totalErrors(i) == 0)) {
-          return totalErrors.indices.filter(i => totalErrors(i) == 0).sortWith((i, j) =>
+        if (totalErrors.indices.exists(totalErrors(_) == 0)) {
+          return totalErrors.indices.filter(totalErrors(_) == 0).sortWith((i, j) =>
             computeComplexity(totalPopulation(i)) < computeComplexity(totalPopulation(j)))
             .map(i => (totalPopulation(i), totalErrors(i))).head
         }
 
         val complexities = totalPopulation.map(computeComplexity)
+        val fitness = totalErrors.indices.map(i => computeFitness(totalErrors(i), complexities(i)))
 
         //Step 4: Population for the next generation
         val finalPopulation = totalPopulation.zipWithIndex.sortWith((t1, t2) => {
           val i = t1._2
           val j = t2._2
 
-          val fitness1 = computeFitness(totalErrors(i), complexities(i))
-          val fitness2 = computeFitness(totalErrors(j), complexities(j))
-          fitness1 < fitness2
+          fitness(i) < fitness(j)
 
         }).map(_._1).take(POPULATION_SIZE)
 
         //Step 5: Loop with current generation + 1
-        loop(g + 1, finalPopulation, totalErrors.sortWith((e1, e2) => e1 < e2).head)
+        loop(g + 1, finalPopulation, totalErrors.indices.sortWith((i, j) => fitness(i) < fitness(j)).map(totalErrors(_)).head)
 
     }
 
