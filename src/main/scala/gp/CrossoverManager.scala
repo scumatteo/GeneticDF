@@ -30,7 +30,7 @@ object CrossoverManager {
    * Static method to perform crossover between two trees.
    *
    * For each tree, a random depth is chosen, then a random node at this depth is chosen, that is the root of the subtree
-   * to cross.
+   * to switch.
    *
    * @param tree1 the first tree
    * @param tree2 the second tree
@@ -45,8 +45,8 @@ object CrossoverManager {
     val tree1Level = tree1.getNodesAtDepth(randomDepth1)
     val tree2Level = tree2.getNodesAtDepth(randomDepth2)
 
-    val randomSubtree1: ImprovedExpressionTree = tree1Level(Random.nextInt(if(tree1Level.isEmpty) 1 else tree1Level.size))
-    val randomSubtree2: ImprovedExpressionTree = tree2Level(Random.nextInt(if(tree2Level.isEmpty) 1 else tree2Level.size))
+    val randomSubtree1: ImprovedExpressionTree = tree1Level(Random.nextInt(tree1Level.size))
+    val randomSubtree2: ImprovedExpressionTree = tree2Level(Random.nextInt(tree2Level.size))
 
     (cross(tree1, randomSubtree1, randomSubtree2, strategy), cross(tree2, randomSubtree2, randomSubtree1, strategy))
 

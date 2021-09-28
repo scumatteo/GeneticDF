@@ -40,45 +40,6 @@ object ImprovedExpressionTree {
     case FunctionSet.MUL => MulNode(left, right, multiplierFactor)
     case FunctionSet.SUB => SubNode(left, right, multiplierFactor)
   }
-/*
-  /**
-   * Constructor for ConstNode.
-   * @param terminal the type of node.
-   * @param value the constant value of the node.
-   * @param multiplierFactor the multiplier factor part (mp).
-   *
-   * @return the new ConstNode.
-   */
-  def apply(terminal: TerminalSet, value: Double, multiplierFactor: Double): Leaf = terminal match {
-    case TerminalSet.CONST => ConstNode(value, multiplierFactor)
-  }
-
-  /**
-   * Constructor for InputNode.
-   * @param terminal the type of node.
-   * @param multiplierFactor the multiplier factor part (mp).
-   *
-   * @return the new InputNode.
-   */
-  def apply(terminal: TerminalSet, multiplierFactor: Double): Leaf = terminal match {
-    case TerminalSet.INPUT => InputNode(multiplierFactor)
-
-  }
-
-  /**
-   * Constructor for GaussianNode
-   * @param terminal the type of node.
-   * @param mean the mean of the gaussian.
-   * @param variance the variance of gaussian.
-   * @param multiplierFactor the multiplier factor part (mp).
-   *
-   * @return the new GaussianNode
-   */
-  def apply(terminal: TerminalSet, mean: Double, variance: Double, multiplierFactor: Double): Leaf = terminal match {
-    case TerminalSet.GAUSSIAN => GaussianNode(mean, variance, multiplierFactor)
-  }
-
- */
 
   /**
    * Trait that represents an IE-Tree. It is extends as its structure part (sp) and it has a multiplier factor (mp).

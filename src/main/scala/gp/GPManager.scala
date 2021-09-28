@@ -1,6 +1,6 @@
 package gp
 
-import tree.ImprovedExpressionTree.{ImprovedExpressionTree, Leaf, Node}
+import tree.ImprovedExpressionTree.{GaussianNode, ImprovedExpressionTree, InputNode, Leaf, Node}
 import tree.TreeManager
 
 import scala.annotation.tailrec
@@ -45,14 +45,13 @@ object GPManager {
    * Value used as weight in the fitness calculation.
    * The greater it is, the more the error has weight with respect to the complexity of the tree.
    */
-  val ALPHA_WEIGHT = 0.7
+  val ALPHA_WEIGHT = 0.99
 
   /**
    * Static method to perform the genetic data fitting.
    *
-   * @param inputs the list of inputs.
+   * @param inputs  the list of inputs.
    * @param outputs the list of outputs
-   *
    * @return a tuple that contains the best IE-Tree and its error.
    */
   def geneticDataFitting(inputs: List[Double], outputs: List[Double]): (ImprovedExpressionTree, Double) = {
@@ -64,10 +63,9 @@ object GPManager {
     /**
      * Inner function to loop on the generations.
      *
-     * @param g the current generation.
+     * @param g          the current generation.
      * @param population the current population.
-     * @param bestError the best error of the previous generation.
-     *
+     * @param bestError  the best error of the previous generation.
      * @return a tuple that contains the best IE-Tree and the best error.
      */
     @tailrec
@@ -91,47 +89,23 @@ object GPManager {
         val totalPopulation = crossoverOffsprings.flatMap(c => List(c._1, c._2)) ::: mutationsOffsprings ::: population
         val totalErrors = totalPopulation.map(p => computeTotalError(p, inputs, outputs, (i, o) => Math.abs(i - o), l => l.sum / l.size))
 
+        //if error = 0 is found, returns.
         if (totalErrors.indices.exists(i => totalErrors(i) == 0)) {
-          return totalErrors.indices.filter(i => totalErrors(i) == 0).map(i => (totalPopulation(i), totalErrors(i))).head
+          return totalErrors.indices.filter(i => totalErrors(i) == 0).sortWith((i, j) =>
+            computeComplexity(totalPopulation(i)) < computeComplexity(totalPopulation(j)))
+            .map(i => (totalPopulation(i), totalErrors(i))).head
         }
 
-        val minError = totalErrors.min
-        val maxError = totalErrors.max
-
         val complexities = totalPopulation.map(computeComplexity)
-        val minComplexities = complexities.min
-        val maxComplexities = complexities.max
-
-        val normalizedErrors = totalErrors.map(e => normalize(e, maxError, minError))
-        val normalizedComplexities = complexities.map(c => normalize(c, maxComplexities, minComplexities))
-
-        /*
-         val finalPopulation = totalPopulation.zipWithIndex.sortWith((t1, t2) => {
-             val i = t1._2
-             val j = t2._2
-
-
-             val fitness1 = computeFitness(normalizedErrors(i), normalizedComplexities(i))
-              val fitness2 = computeFitness(normalizedErrors(j), normalizedComplexities(j))
-              if (fitness1 < fitness2) true else false
-
-           }).map(_._1).take(POPULATION_SIZE)
-
-         */
 
         //Step 4: Population for the next generation
         val finalPopulation = totalPopulation.zipWithIndex.sortWith((t1, t2) => {
           val i = t1._2
           val j = t2._2
 
-          if (totalErrors(i) < totalErrors(j)) true
-          else if (totalErrors(i) > totalErrors(j)) false
-          else {
-            val fitness1 = computeFitness(normalizedErrors(i), normalizedComplexities(i))
-            val fitness2 = computeFitness(normalizedErrors(j), normalizedComplexities(j))
-            if (fitness1 < fitness2) true
-            else false
-          }
+          val fitness1 = computeFitness(totalErrors(i), complexities(i))
+          val fitness2 = computeFitness(totalErrors(j), complexities(j))
+          fitness1 < fitness2
 
         }).map(_._1).take(POPULATION_SIZE)
 
@@ -147,12 +121,11 @@ object GPManager {
   /**
    * Private static method to compute the total errors of a tree.
    *
-   * @param tree the tree to evaluate.
-   * @param inputs the list of inputs.
-   * @param outputs the list of outputs.
-   * @param errorFunc the error function to calculate a single error.
+   * @param tree           the tree to evaluate.
+   * @param inputs         the list of inputs.
+   * @param outputs        the list of outputs.
+   * @param errorFunc      the error function to calculate a single error.
    * @param totalErrorFunc the error function to accumulate the single errors.
-   *
    * @return the total error of a tree, evaluated on all the inputs.
    */
   private def computeTotalError(tree: ImprovedExpressionTree, inputs: List[Double], outputs: List[Double],
@@ -168,37 +141,24 @@ object GPManager {
    * Private static method to compute the complexity of a tree. It's computed as the number of nodes of the tree.
    *
    * @param tree the tree for which compute the complexity.
-   *
    * @return the complexity of the tree.
    */
   private def computeComplexity(tree: ImprovedExpressionTree): Int = {
 
-    def compute(tree: ImprovedExpressionTree, acc: Int): Int = tree match {
-      case _: Leaf => acc + 1
-      case n: Node => compute(n.l, acc) + compute(n.r, acc) + 1
+    def compute(tree: ImprovedExpressionTree, complexity: Int): Int = tree match {
+      case _: Leaf => complexity + 1
+      case n: Node => compute(n.l, complexity) + compute(n.r, complexity) + 1
     }
 
     compute(tree, 0)
   }
 
   /**
-   * Private static method to normalize a value.
-   *
-   * @param value the value to normalize.
-   * @param max the max value of the range.
-   * @param min the min value of the range.
-   *
-   * @return the normalized value.
-   */
-  private def normalize(value: Double, max: Double, min: Double): Double = (value - min) / (max - min)
-
-  /**
    * Private static method to compute the fitness of a tree.
    *
-   * @param error the error made by the tree.
+   * @param error      the error made by the tree.
    * @param complexity the complexity of the tree.
-   * @param alpha a weight to balance the complexity and the error.
-   *
+   * @param alpha      a weight to balance the complexity and the error.
    * @return the fitness of the tree.
    */
   private def computeFitness(error: Double, complexity: Double, alpha: Double = ALPHA_WEIGHT): Double = {
