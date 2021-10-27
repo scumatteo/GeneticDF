@@ -97,19 +97,19 @@ object GPManager {
         }
 
         val complexities = totalPopulation.map(computeComplexity)
-        val fitness = totalErrors.indices.map(i => computeFitness(totalErrors(i), complexities(i)))
+        val weightedErrors = totalErrors.indices.map(i => computeWeightedError(totalErrors(i), complexities(i)))
 
         //Step 4: Population for the next generation
         val finalPopulation = totalPopulation.zipWithIndex.sortWith((t1, t2) => {
           val i = t1._2
           val j = t2._2
 
-          fitness(i) < fitness(j)
+          weightedErrors(i) < weightedErrors(j)
 
         }).map(_._1).take(POPULATION_SIZE)
 
         //Step 5: Loop with current generation + 1
-        loop(g + 1, finalPopulation, totalErrors.indices.sortWith((i, j) => fitness(i) < fitness(j)).map(totalErrors(_)).head)
+        loop(g + 1, finalPopulation, totalErrors.indices.sortWith((i, j) => weightedErrors(i) < weightedErrors(j)).map(totalErrors(_)).head)
 
     }
 
@@ -153,14 +153,14 @@ object GPManager {
   }
 
   /**
-   * Private static method to compute the fitness of a tree.
+   * Private static method to compute the weighted error of a tree, balancing the error and the complexity.
    *
    * @param error      the error made by the tree.
    * @param complexity the complexity of the tree.
    * @param alpha      a weight to balance the complexity and the error.
-   * @return the fitness of the tree.
+   * @return the weighted error of the tree.
    */
-  private def computeFitness(error: Double, complexity: Double, alpha: Double = ALPHA_WEIGHT): Double = {
+  private def computeWeightedError(error: Double, complexity: Double, alpha: Double = ALPHA_WEIGHT): Double = {
     alpha * error + (1 - alpha) * complexity
   }
 
